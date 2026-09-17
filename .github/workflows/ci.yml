@@ -1,0 +1,43 @@
+name: Quality checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm exec -- turbo run typecheck test build
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate integration Compose configuration
+        run: docker compose -f compose.test.yaml config --quiet
+      - name: Build frontend image
+        run: docker build --file frontend/Dockerfile --tag serena-frontend:ci .
+      - name: Test frontend startup as the container user
+        run: |
+          docker run --detach --name serena-frontend-ci --publish 127.0.0.1:5173:5173 serena-frontend:ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --max-time 3 http://127.0.0.1:5173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs serena-frontend-ci
+          exit 1
+      - name: Run integration against disposable PostgreSQL
+        run: docker compose -f compose.test.yaml up --build --abort-on-container-exit --exit-code-from integration
+      - name: Clean up test containers
+        if: always()
+        run: |
+          docker rm --force serena-frontend-ci || true
+          docker compose -f compose.test.yaml down
