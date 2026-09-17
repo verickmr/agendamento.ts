@@ -1,0 +1,32 @@
+name: serena-tests
+
+services:
+  db-test:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: serena_test
+      POSTGRES_USER: serena_test
+      POSTGRES_PASSWORD: disposable_test_password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U serena_test -d serena_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  integration:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://serena_test:disposable_test_password@db-test:5432/serena_application_guard?schema=public
+      TEST_DATABASE_URL: postgresql://serena_test:disposable_test_password@db-test:5432/serena_test?schema=public
+    command:
+      - sh
+      - -c
+      - DATABASE_URL="$$TEST_DATABASE_URL" npm run db:migrate -w backend && npm run test:integration -w backend
+    depends_on:
+      db-test:
+        condition: service_healthy

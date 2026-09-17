@@ -1,0 +1,70 @@
+name: serena
+services:
+  db:
+    image: postgres:16-bookworm
+    environment:
+      POSTGRES_DB: serena
+      POSTGRES_USER: serena
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Configure POSTGRES_PASSWORD in .env}
+    ports:
+      - '127.0.0.1:5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U serena -d serena']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://serena:${POSTGRES_PASSWORD}@db:5432/serena?schema=public
+    command: ['npm', 'run', 'db:migrate', '-w', 'backend']
+    depends_on:
+      db:
+        condition: service_healthy
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://serena:${POSTGRES_PASSWORD}@db:5432/serena?schema=public
+      SESSION_SECRET: ${SESSION_SECRET:?Configure SESSION_SECRET in .env}
+      FRONTEND_ORIGIN: http://localhost:5173
+      SEED_EMAIL: ${SEED_EMAIL:-recepcao@serena.local}
+      SEED_NAME: ${SEED_NAME:-Recepção Serena}
+      SEED_PASSWORD: ${SEED_PASSWORD:?Configure SEED_PASSWORD in .env}
+      PORT: '3001'
+      HOST: 0.0.0.0
+      NODE_ENV: development
+    ports:
+      - '127.0.0.1:3001:3001'
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3001/meta').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      API_PROXY_TARGET: http://backend:3001
+    ports:
+      - '127.0.0.1:5173:5173'
+    depends_on:
+      backend:
+        condition: service_healthy
+volumes:
+  postgres_data:
