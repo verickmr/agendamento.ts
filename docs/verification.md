@@ -1,5 +1,11 @@
 # Validação
 
+## Máscara, validação e layout compacto
+
+Foram aprovados 77 testes locais (58 backend e 19 frontend), verificação de tipos, build e formatação. Os casos novos cobrem DDD, fixo/celular, prefixo internacional, e-mail inválido, nomes com acentos e pontuação, normalização e mensagens obrigatórias em português. A máscara foi exercitada com digitação, colagem, seleção/substituição, Backspace e Delete no meio do número. Os testes do formulário verificam erros ao sair do campo e sua remoção após a correção.
+
+O desktop usa espaçamento compacto e campos de contato lado a lado; telas de menor altura recebem ajustes adicionais. No celular, os campos permanecem empilhados e a rolagem é preservada. Não foi aplicado `overflow: hidden` ao documento. A ausência de rolagem em cada viewport ainda depende da inspeção visual pendente.
+
 ## Contatos e bloqueio do passado
 
 A atualização do formulário passou em 62 testes locais (53 backend e 9 frontend), tipos, build e formatação. Mais 21 testes de integração passaram em uma branch isolada do Neon antes da migração de produção. O relógio dos testes é fixo: os exemplos de 2026 não dependem do dia em que a suíte é executada.

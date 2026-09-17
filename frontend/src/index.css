@@ -1112,31 +1112,103 @@
 .block-row > button {
   font-size: 10px;
 }
-@media (min-width: 1440px) {
-  .public-main {
-    padding-top: 0;
+@media (min-width: 1001px) {
+  .public-header {
+    height: 64px;
   }
   .hero {
-    padding-bottom: 28px;
+    padding: 12px 16px 20px;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 2.6vw, 38px);
+    margin: 8px 0;
+  }
+  .booking-panel {
+    grid-template-columns: minmax(0, 1.7fr) minmax(370px, 1fr);
   }
   .booking-picker,
   .booking-summary {
-    padding: 28px;
+    padding: 22px;
   }
   .picker-columns {
-    gap: 30px;
+    gap: 20px;
   }
-  .calendar-day {
-    height: 42px;
+  .time-section {
+    padding-left: 20px;
   }
-  .time-choice {
-    min-height: 45px;
+  .booking-panel .section-heading {
+    margin-bottom: 18px;
   }
-  .section-heading {
-    margin-bottom: 24px;
+  .summary-lines {
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .booking-summary form {
+    margin-top: 16px;
+  }
+  .booking-summary [data-slot='field-group'] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px 12px;
+  }
+  .booking-summary [data-slot='field-group'] > :first-child,
+  .booking-summary [data-slot='field-group'] > :not([data-slot='field']) {
+    grid-column: 1 / -1;
+  }
+  .booking-summary [data-slot='field'] {
+    min-width: 0;
+    gap: 6px;
+  }
+  .booking-summary input {
+    font-size: 14px;
+  }
+  .booking-summary form button {
+    margin-top: 0;
+  }
+  .summary-footnote {
+    margin: 12px 0 0;
+    line-height: 1.5;
+  }
+  .clinic-facts {
+    margin-top: 16px;
   }
   .public-note {
-    margin-bottom: 28px;
+    margin: 10px 0 14px;
+  }
+  .public-footer {
+    padding-block: 12px;
+  }
+}
+@media (min-width: 1001px) and (max-height: 800px) {
+  .hero {
+    padding: 4px 16px 12px;
+  }
+  .hero h1 {
+    font-size: 30px;
+    margin: 6px 0;
+  }
+  .hero p {
+    font-size: 14px;
+  }
+  .booking-picker,
+  .booking-summary {
+    padding-block: 18px;
+  }
+  .calendar-day {
+    height: 36px;
+  }
+  .calendar-grid {
+    row-gap: 3px;
+  }
+  .calendar-note {
+    margin-top: 10px;
+  }
+  .time-grid {
+    margin-top: 12px;
+    gap: 7px;
+  }
+  .slots-legend {
+    margin-block: 10px;
   }
 }
 @media (max-width: 1100px) {
