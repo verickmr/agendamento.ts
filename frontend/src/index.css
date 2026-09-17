@@ -246,7 +246,7 @@
   background: transparent;
   border: 1px solid transparent;
 }
-.calendar-day:hover:not(:disabled) {
+.calendar-day:hover:not(:disabled):not([aria-pressed='true']) {
   background: var(--secondary);
 }
 .calendar-day[aria-pressed='true'] {
@@ -302,7 +302,7 @@
     background 0.15s,
     border-color 0.15s;
 }
-.time-choice:hover:not([data-disabled='true']) {
+.time-choice:hover:not([data-disabled='true']):not([data-selected='true']) {
   border-color: var(--primary);
   background: var(--secondary);
 }
@@ -385,7 +385,30 @@
   gap: 8px;
 }
 .patient-contact {
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+.patient-cell a.patient-contact {
+  display: block;
+  width: fit-content;
+  margin-top: 5px;
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.patient-cell a.patient-contact:hover {
+  text-decoration-thickness: 2px;
+}
+.confirmation-ticket .patient-contact strong,
+.confirmation-ticket .patient-contact span {
+  display: block;
+}
+.confirmation-ticket .patient-contact strong {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  margin-bottom: 3px;
 }
 .booking-summary form {
   margin-top: 28px;

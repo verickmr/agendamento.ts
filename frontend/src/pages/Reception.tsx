@@ -212,8 +212,19 @@ export default function Reception() {
                   <span>
                     <strong>{a.name}</strong>
                     <small>Atendimento clínico</small>
-                    {a.email && <small className="patient-contact">{a.email}</small>}
-                    {a.phone && <small className="patient-contact">{a.phone}</small>}
+                    {a.email && (
+                      <a className="patient-contact" href={`mailto:${a.email}`}>
+                        E-mail: {a.email}
+                      </a>
+                    )}
+                    {a.phone && (
+                      <a className="patient-contact" href={`tel:${a.phone}`}>
+                        Telefone: {a.phone}
+                      </a>
+                    )}
+                    {!a.email && !a.phone && (
+                      <small>Contato não informado neste agendamento.</small>
+                    )}
                   </span>
                 </div>
                 <div>

@@ -10,6 +10,8 @@ import {
   MapPin,
   Stethoscope,
   ShieldCheck,
+  Mail,
+  Phone,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -118,8 +120,27 @@ export default function Booking() {
             <ShieldCheck />
             <span>{confirmed.name}</span>
           </div>
+          {confirmed.email && (
+            <div>
+              <Mail aria-hidden="true" />
+              <span className="patient-contact">
+                <strong>E-mail para contato</strong>
+                <span>{confirmed.email}</span>
+              </span>
+            </div>
+          )}
+          {confirmed.phone && (
+            <div>
+              <Phone aria-hidden="true" />
+              <span className="patient-contact">
+                <strong>Telefone para contato</strong>
+                <span>{confirmed.phone}</span>
+              </span>
+            </div>
+          )}
           <Badge variant="secondary">Agendamento confirmado</Badge>
         </div>
+        <p>A recepção poderá usar os contatos informados para falar com você sobre a consulta.</p>
         <p className="muted">Para alterar ou cancelar, entre em contato com a recepção.</p>
         <Button
           onClick={() => {
@@ -327,7 +348,7 @@ export default function Booking() {
           </form>
           <p className="summary-footnote">
             <ShieldCheck />
-            Seus dados são usados somente para organizar seu atendimento.
+            Usaremos seu e-mail e telefone para entrar em contato sobre seu atendimento.
           </p>
         </aside>
       </div>

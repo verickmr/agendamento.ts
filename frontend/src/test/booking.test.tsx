@@ -69,6 +69,8 @@ describe('booking form', () => {
         return respond({
           id: 'a1',
           name: 'Ana Maria',
+          email: 'ana@exemplo.com',
+          phone: '11999999999',
           date: '2026-09-15',
           time: '09:00',
           endTime: '10:00',
@@ -96,6 +98,10 @@ describe('booking form', () => {
     await user.type(screen.getByLabelText('Telefone com DDD'), '(11) 99999-9999');
     await user.click(screen.getByRole('button', { name: 'Confirmar agendamento' }));
     expect(await screen.findByRole('heading', { name: 'Consulta agendada.' })).toBeInTheDocument();
+    expect(screen.getByText('E-mail para contato')).toBeInTheDocument();
+    expect(screen.getByText('ana@exemplo.com')).toBeInTheDocument();
+    expect(screen.getByText('Telefone para contato')).toBeInTheDocument();
+    expect(screen.getByText('11999999999')).toBeInTheDocument();
     expect(requests).toEqual([
       {
         url: '/api/appointments',

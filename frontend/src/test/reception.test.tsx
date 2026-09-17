@@ -37,6 +37,33 @@ function mount(component: React.ReactNode) {
     </QueryClientProvider>,
   );
 }
+it('offers email and telephone links for the clinic and identifies legacy records without contacts', async () => {
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (input: string) =>
+      response(
+        input === '/api/meta'
+          ? { today: '2026-09-15' }
+          : {
+              appointments: [
+                { ...appointment, email: 'ana@exemplo.com', phone: '11999999999' },
+                { ...appointment, id: 'legacy', name: 'Paciente antigo', email: null, phone: null },
+              ],
+            },
+      ),
+    ),
+  );
+  mount(<Reception />);
+  expect(await screen.findByRole('link', { name: 'E-mail: ana@exemplo.com' })).toHaveAttribute(
+    'href',
+    'mailto:ana@exemplo.com',
+  );
+  expect(screen.getByRole('link', { name: 'Telefone: 11999999999' })).toHaveAttribute(
+    'href',
+    'tel:11999999999',
+  );
+  expect(screen.getByText('Contato não informado neste agendamento.')).toBeInTheDocument();
+});
 it('cancels only after confirmation and includes the displayed version', async () => {
   const mutations: { url: string; body: unknown }[] = [];
   vi.stubGlobal(
