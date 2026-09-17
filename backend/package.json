@@ -1,0 +1,42 @@
+{
+  "name": "@serena/backend",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "test": "vitest run --exclude '**/*.integration.test.ts'",
+    "test:integration": "vitest run test/appointments.integration.test.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@prisma/client": "6.19.2",
+    "@vercel/functions": "^3.9.8",
+    "bcryptjs": "^3.0.2",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "pg": "^8.16.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/connect-pg-simple": "^7.0.3",
+    "@types/express": "^5.0.1",
+    "@types/express-session": "^1.18.1",
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.15.2",
+    "@types/supertest": "^6.0.3",
+    "prisma": "6.19.2",
+    "supertest": "^7.1.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.0"
+  }
+}

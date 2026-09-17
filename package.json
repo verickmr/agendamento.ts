@@ -1,0 +1,31 @@
+{
+  "name": "serena",
+  "private": true,
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:integration": "turbo run test:integration --filter=@serena/backend",
+    "test:docker": "docker compose -f compose.test.yaml up --build --abort-on-container-exit --exit-code-from integration",
+    "db:generate": "turbo run db:generate --filter=@serena/backend",
+    "db:migrate": "turbo run db:migrate --filter=@serena/backend",
+    "db:seed": "turbo run db:seed --filter=@serena/backend",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "turbo": "^2.5.3",
+    "prettier": "^3.5.3"
+  }
+}
