@@ -1,5 +1,13 @@
 # Validação
 
+## Contatos e bloqueio do passado
+
+A atualização do formulário passou em 62 testes locais (53 backend e 9 frontend), tipos, build e formatação. Mais 21 testes de integração passaram em uma branch isolada do Neon antes da migração de produção. O relógio dos testes é fixo: os exemplos de 2026 não dependem do dia em que a suíte é executada.
+
+Foram verificadas a virada do dia no fuso de São Paulo, a expiração exata de um horário, a revalidação após espera na transação, o bloqueio de reserva/remarcação no passado e a manutenção de correções de nome em registros históricos. Os testes de formulário verificam calendário e entrada manual de data passada, contatos obrigatórios e envio normalizado.
+
+A versão atualizada na Vercel passou em 35 requisições HTTPS, incluindo persistência de e-mail e telefone, rejeição de contatos inválidos e resposta `PAST_SLOT` em reservas e remarcações antigas. A migração acrescenta colunas nulas aos registros antigos, sem apagar agendamentos. O build das mudanças de espaçamento, tipografia e responsividade passou; a inspeção visual continua pendente conforme a limitação registrada abaixo.
+
 ## Verificações locais
 
 Após a separação de controllers, services e repositories, em 16/09/2026, foram aprovados:

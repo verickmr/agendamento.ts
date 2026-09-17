@@ -94,7 +94,7 @@
   font-weight: 700;
 }
 .public-header {
-  height: 104px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -128,7 +128,7 @@
 }
 .hero {
   text-align: center;
-  padding: 53px 16px 44px;
+  padding: 24px 16px 28px;
 }
 .eyebrow {
   font-size: 10px;
@@ -146,11 +146,11 @@
   border-radius: 50%;
 }
 .hero h1 {
-  font-size: clamp(32px, 3.4vw, 49px);
+  font-size: clamp(30px, 3vw, 42px);
   font-weight: 650;
   line-height: 1.2;
   letter-spacing: -1.8px;
-  margin: 17px 0 13px;
+  margin: 12px 0 10px;
   color: var(--primary);
 }
 .hero p {
@@ -168,7 +168,7 @@
 }
 .booking-panel {
   display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(0, 1.8fr) minmax(340px, 1fr);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
@@ -176,7 +176,7 @@
   box-shadow: 0 14px 35px #173c2a04;
 }
 .booking-picker {
-  padding: 31px;
+  padding: 28px;
 }
 .section-heading {
   display: flex;
@@ -203,11 +203,12 @@
   margin-top: -1px;
 }
 .section-heading p {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--muted-foreground);
   margin-top: 5px;
 }
 .picker-columns {
+  min-width: 0;
   display: grid;
   grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
   gap: 27px;
@@ -233,19 +234,19 @@
 }
 .weekday {
   text-align: center;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted-foreground);
   margin-bottom: 6px;
 }
 .calendar-day {
-  height: 35px;
+  height: 42px;
   border-radius: 7px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--foreground);
   background: transparent;
   border: 1px solid transparent;
 }
-.calendar-day:hover {
+.calendar-day:hover:not(:disabled) {
   background: var(--secondary);
 }
 .calendar-day[aria-pressed='true'] {
@@ -261,7 +262,7 @@
   justify-content: center;
   gap: 7px;
   color: var(--muted-foreground);
-  font-size: 10px;
+  font-size: 12px;
   margin-top: 20px;
 }
 .calendar-note svg {
@@ -273,12 +274,12 @@
   border-left: 1px solid var(--border);
 }
 .time-section h3 {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   line-height: 20px;
 }
 .time-section > p {
-  font-size: 11px;
+  font-size: 13px;
   color: var(--muted-foreground);
   margin-top: 4px;
 }
@@ -296,7 +297,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-size: 12px;
+  font-size: 14px;
   transition:
     background 0.15s,
     border-color 0.15s;
@@ -331,7 +332,7 @@
   height: 12px;
 }
 .slots-legend {
-  font-size: 8px;
+  font-size: 12px;
   color: var(--muted-foreground);
   display: flex;
   align-items: center;
@@ -352,20 +353,20 @@
 }
 .booking-summary {
   background: #eef5f0;
-  padding: 31px 30px;
+  padding: 28px;
   border-left: 1px solid var(--border);
 }
 .summary-lines {
   display: flex;
   flex-direction: column;
-  gap: 22px;
-  margin: 34px 0;
+  gap: 14px;
+  margin: 22px 0;
 }
 .summary-lines > div {
   display: flex;
   align-items: center;
   gap: 13px;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.5;
 }
 .summary-lines svg {
@@ -377,24 +378,33 @@
 .summary-lines div:nth-child(2) span:first-letter {
   text-transform: uppercase;
 }
+.booking-summary [data-slot='field-group'] {
+  gap: 18px;
+}
+.booking-summary [data-slot='field'] {
+  gap: 8px;
+}
+.patient-contact {
+  overflow-wrap: anywhere;
+}
 .booking-summary form {
   margin-top: 28px;
 }
 .booking-summary form button {
   margin-top: 6px;
   min-height: 44px;
-  font-size: 12px;
+  font-size: 14px;
 }
 .booking-summary input {
   background: var(--card);
   min-height: 42px;
-  font-size: 12px;
+  font-size: 16px;
 }
 .summary-footnote {
   display: flex;
   gap: 8px;
   margin: 19px 8px 0;
-  font-size: 9px;
+  font-size: 12px;
   line-height: 1.7;
   color: var(--muted-foreground);
 }
@@ -410,7 +420,7 @@
   align-items: center;
   justify-content: center;
   margin-top: 35px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted-foreground);
 }
 .clinic-facts span {
@@ -430,7 +440,7 @@
 .public-note {
   text-align: center;
   color: var(--muted-foreground);
-  font-size: 10px;
+  font-size: 12px;
   margin: 23px 0 43px;
 }
 .public-footer {
@@ -440,7 +450,7 @@
   margin: 0 auto;
   padding: 23px 0;
   border-top: 1px solid var(--border);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted-foreground);
 }
 .public-footer span:first-child {
@@ -1081,29 +1091,29 @@
 }
 @media (min-width: 1440px) {
   .public-main {
-    padding-top: 12px;
+    padding-top: 0;
   }
   .hero {
-    padding-bottom: 50px;
+    padding-bottom: 28px;
   }
   .booking-picker,
   .booking-summary {
-    padding: 36px;
+    padding: 28px;
   }
   .picker-columns {
     gap: 30px;
   }
   .calendar-day {
-    height: 39px;
+    height: 42px;
   }
   .time-choice {
     min-height: 45px;
   }
   .section-heading {
-    margin-bottom: 33px;
+    margin-bottom: 24px;
   }
   .public-note {
-    margin-bottom: 57px;
+    margin-bottom: 28px;
   }
 }
 @media (max-width: 1100px) {
@@ -1170,7 +1180,7 @@
     font-size: 10px;
   }
 }
-@media (max-width: 850px) {
+@media (max-width: 1000px) {
   .booking-panel {
     grid-template-columns: 1fr;
   }
@@ -1191,7 +1201,7 @@
     gap: 18px;
   }
   .summary-lines > div {
-    font-size: 12px;
+    font-size: 14px;
     align-items: flex-start;
   }
   .booking-summary form {
@@ -1208,11 +1218,13 @@
     gap: 27px;
   }
   .calendar-day {
-    height: 39px;
+    height: 42px;
   }
   .hero {
     padding-top: 35px;
   }
+}
+@media (max-width: 850px) {
   .sidebar {
     width: 188px;
     padding-inline: 10px;
@@ -1355,7 +1367,7 @@
   }
   .public-header nav {
     gap: 17px;
-    font-size: 10px;
+    font-size: 14px;
   }
   .public-header nav a:first-child {
     display: none;
@@ -1376,7 +1388,7 @@
     letter-spacing: -1.25px;
   }
   .hero p {
-    font-size: 12px;
+    font-size: 15px;
     line-height: 1.8;
   }
   .eyebrow {
@@ -1401,7 +1413,7 @@
     font-size: 18px;
   }
   .section-heading p {
-    font-size: 10px;
+    font-size: 14px;
   }
   .step-number {
     width: 29px;
@@ -1419,8 +1431,8 @@
     margin-bottom: 12px;
   }
   .calendar-day {
-    height: 36px;
-    font-size: 12px;
+    height: 42px;
+    font-size: 14px;
   }
   .calendar-grid {
     gap: 4px;
@@ -1441,10 +1453,10 @@
     min-height: 43px;
   }
   .time-section h3 {
-    font-size: 13px;
+    font-size: 15px;
   }
   .slots-legend {
-    font-size: 9px;
+    font-size: 12px;
   }
   .summary-lines {
     display: flex;
@@ -1452,20 +1464,20 @@
     margin: 25px 0;
   }
   .summary-lines > div {
-    font-size: 12px;
+    font-size: 14px;
   }
   .booking-summary form {
     margin-top: 24px;
   }
   .summary-footnote {
-    font-size: 9px;
+    font-size: 12px;
     margin-inline: 0;
   }
   .clinic-facts {
     flex-wrap: wrap;
     gap: 15px;
     margin-top: 26px;
-    font-size: 10px;
+    font-size: 13px;
   }
   .clinic-facts span {
     padding: 0 13px;
@@ -1481,7 +1493,7 @@
     height: 14px;
   }
   .public-note {
-    font-size: 9px;
+    font-size: 12px;
     line-height: 1.6;
     padding: 0 25px;
     margin: 20px 0 30px;
@@ -1489,7 +1501,7 @@
   .public-footer {
     padding: 20px 0;
     margin: 0 20px;
-    font-size: 8px;
+    font-size: 12px;
     gap: 12px;
   }
   .confirmation-wrap {
