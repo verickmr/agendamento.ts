@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
+}
+
+model Receptionist {
+  id            String              @id @default(uuid())
+  name          String              @db.VarChar(120)
+  email         String              @unique @db.VarChar(254)
+  passwordHash  String
+  cancellations Appointment[]       @relation("CancellationActor")
+  createdBlocks AvailabilityBlock[] @relation("BlockCreator")
+  removedBlocks AvailabilityBlock[] @relation("BlockRemover")
+}
+
+model Appointment {
+  id                String            @id @default(uuid())
+  name              String            @db.VarChar(120)
+  date              DateTime          @db.Date
+  startMinute       Int
+  status            AppointmentStatus @default(CONFIRMED)
+  version           Int               @default(1)
+  createdAt         DateTime          @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime          @updatedAt @db.Timestamptz(3)
+  cancelledAt       DateTime?         @db.Timestamptz(3)
+  cancelledBy       String?
+  cancellationActor Receptionist?     @relation("CancellationActor", fields: [cancelledBy], references: [id])
+
+  @@index([date, status])
+}
+
+model AvailabilityBlock {
+  id          String        @id @default(uuid())
+  date        DateTime      @db.Date
+  startMinute Int?
+  reason      String?       @db.VarChar(300)
+  createdAt   DateTime      @default(now()) @db.Timestamptz(3)
+  createdBy   String
+  creator     Receptionist  @relation("BlockCreator", fields: [createdBy], references: [id])
+  removedAt   DateTime?     @db.Timestamptz(3)
+  removedBy   String?
+  remover     Receptionist? @relation("BlockRemover", fields: [removedBy], references: [id])
+
+  @@index([date, removedAt])
+}
+
+model LoginAttempt {
+  id        String   @id @default(uuid())
+  account   String   @db.VarChar(254)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([account, createdAt])
+}
+
+model Session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
+  @@map("session")
+}
