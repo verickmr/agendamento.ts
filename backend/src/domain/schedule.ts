@@ -19,9 +19,23 @@ const nameSchema = z
   .min(1, 'Informe o nome.')
   .max(120, 'O nome deve ter até 120 caracteres.');
 export const versionSchema = z.number().int().positive();
+const emailSchema = z.string().trim().toLowerCase().email('Informe um e-mail válido.').max(254);
+const phoneSchema = z
+  .string()
+  .trim()
+  .max(30)
+  .regex(/^[+\d\s().-]+$/, 'Informe um telefone válido com DDD.')
+  .transform((value) => value.replace(/\D/g, ''))
+  .refine((value) => /^(?:55)?\d{10,11}$/.test(value), 'Informe um telefone válido com DDD.');
 export const idSchema = z.string().uuid();
 export const createSchema = z
-  .object({ name: nameSchema, date: dateSchema, time: timeSchema })
+  .object({
+    name: nameSchema,
+    email: emailSchema,
+    phone: phoneSchema,
+    date: dateSchema,
+    time: timeSchema,
+  })
   .strict();
 export const patchSchema = z
   .object({

@@ -70,7 +70,8 @@ O Turbo gera o Prisma Client antes das tarefas que precisam dele. Build, tipos e
 ## Regras
 
 - Atendimento de segunda a sexta, das 08:00 às 18:00, com consultas de uma hora. O último início é às 17:00.
-- Agenda de 2026, no fuso `America/Sao_Paulo`. Datas passadas desse ano são aceitas para reproduzir os exemplos do teste técnico.
+- Agenda de 2026, no fuso `America/Sao_Paulo`. Reservas e remarcações exigem data e horário futuros; horários que já começaram hoje também são bloqueados pelo backend.
+- Novas reservas exigem nome, e-mail válido e telefone com DDD. Os contatos ficam disponíveis apenas na confirmação da reserva e na recepção autenticada.
 - Feriados consultados no backend pela [API Nager.Date](https://date.nager.at/api/v3/PublicHolidays/2026/BR), sem cache e com timeout de oito segundos. Todas as datas retornadas são bloqueadas, inclusive itens regionais/opcionais.
 - Falha na API impede novas reservas e remarcações. Edição de nome e cancelamento continuam disponíveis.
 - Horários ocupados ou bloqueados não podem receber reservas. Transações e restrições no PostgreSQL protegem requisições simultâneas.
@@ -82,7 +83,13 @@ O Turbo gera o Prisma Client antes das tarefas que precisam dele. Build, tipos e
 Rotas mínimas: `GET /available?date=2026-02-10`, `POST /appointments` e `GET /appointments`. A listagem exige sessão da recepção para proteger os dados dos pacientes.
 
 ```json
-{ "name": "Paciente de teste", "date": "2026-02-10", "time": "09:00" }
+{
+  "name": "Paciente de teste",
+  "email": "paciente@example.com",
+  "phone": "11999999999",
+  "date": "2026-12-15",
+  "time": "09:00"
+}
 ```
 
 Consulte o [contrato REST](docs/implementation-contract.md) para autenticação, edição, cancelamento, bloqueios e respostas. As decisões de arquitetura estão em [arquitetura](docs/architecture.md).

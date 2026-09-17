@@ -7,14 +7,16 @@ A API recebe e retorna JSON. No navegador, o proxy acrescenta `/api` às rotas a
 | Método e rota                    | Acesso   | Entrada e resposta                                        |
 | -------------------------------- | -------- | --------------------------------------------------------- |
 | `GET /available?date=2026-02-10` | Público  | Retorna disponibilidade do dia                            |
-| `POST /appointments`             | Público  | `{name,date,time}` → 201 e agendamento                    |
+| `POST /appointments`             | Público  | `{name,email,phone,date,time}` → 201 e agendamento        |
 | `GET /appointments`              | Recepção | Filtros opcionais `date` e `status` → `{appointments:[]}` |
 | `PATCH /appointments/:id`        | Recepção | `{version,name?,date?,time?}` → agendamento atualizado    |
 | `POST /appointments/:id/cancel`  | Recepção | `{version}` → agendamento cancelado                       |
 
 `status` aceita `CONFIRMED`, `CANCELLED` ou `ALL`; o padrão é `CONFIRMED`. Sem filtro de data, a listagem é ordenada por data e horário. Apenas consultas confirmadas podem ser editadas. Alterações exigem a versão lida pelo cliente; uma versão desatualizada retorna 409.
 
-O agendamento contém `id`, `name`, `date`, `time`, `endTime`, `timezone`, `status`, `version`, `createdAt`, `updatedAt` e `cancelledAt`. O nome é obrigatório, com até 120 caracteres, removendo espaços nas extremidades.
+O agendamento contém `id`, `name`, `email`, `phone`, `date`, `time`, `endTime`, `timezone`, `status`, `version`, `createdAt`, `updatedAt` e `cancelledAt`. O nome é obrigatório, com até 120 caracteres. Novas reservas exigem e-mail válido (até 254 caracteres, normalizado em minúsculas) e telefone brasileiro com DDD (10 ou 11 dígitos, opcionalmente com prefixo 55). A pontuação do telefone é removida. Contatos podem ser nulos em registros anteriores à migração.
+
+Datas passadas retornam disponibilidade vazia. Em hoje, são excluídos horários que já começaram, usando o relógio do servidor no fuso `America/Sao_Paulo`. Tentativas de reservar ou remarcar para o passado retornam 422 com código `PAST_SLOT`. Edição apenas do nome e cancelamento de registros históricos continuam permitidos.
 
 A disponibilidade contém `date`, `timezone`, `isBusinessDay`, `reason`, `slots`, `occupied`, `blocked` e `holidays`. Cada slot contém `start` e `end`. Horários ocupados e bloqueados são listas de `HH:mm`, sem nomes de pacientes ou motivos internos. Feriados contêm `date` e `localName`.
 

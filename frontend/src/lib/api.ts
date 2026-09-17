@@ -2,6 +2,8 @@ import { QueryClient } from '@tanstack/react-query';
 export type Appointment = {
   id: string;
   name: string;
+  email: string | null;
+  phone: string | null;
   date: string;
   time: string;
   endTime: string;
@@ -84,6 +86,7 @@ export async function refreshAppointments() {
   ]);
 }
 export const availabilityOptions = (date: string) => ({
+  refetchInterval: 30_000,
   queryKey: ['available', date],
   queryFn: () => api<Availability>(`/available?date=${date}`),
   enabled: /^2026-\d{2}-\d{2}$/.test(date),

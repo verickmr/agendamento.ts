@@ -2,6 +2,8 @@ export type AppointmentStatus = 'CONFIRMED' | 'CANCELLED';
 export interface AppointmentRecord {
   id: string;
   name: string;
+  email: string | null;
+  phone: string | null;
   date: Date;
   startMinute: number;
   status: AppointmentStatus;

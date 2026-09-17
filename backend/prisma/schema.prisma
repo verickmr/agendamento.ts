@@ -25,6 +25,8 @@ model Receptionist {
 model Appointment {
   id                String            @id @default(uuid())
   name              String            @db.VarChar(120)
+  email             String?           @db.VarChar(254)
+  phone             String?           @db.VarChar(13)
   date              DateTime          @db.Date
   startMinute       Int
   status            AppointmentStatus @default(CONFIRMED)

@@ -14,12 +14,14 @@ export function createApp({
   prisma,
   holidays,
   config,
+  now,
 }: {
   prisma: PrismaClient;
   holidays: HolidayProvider;
   config: AppConfig;
+  now?: () => Date;
 }) {
-  const schedule = new ScheduleService(new PrismaScheduleRepository(prisma), holidays);
+  const schedule = new ScheduleService(new PrismaScheduleRepository(prisma), holidays, now);
   const auth = new AuthService(new PrismaAuthRepository(prisma), new BcryptPasswordVerifier());
   const sessions = createPostgresSessionStore(config.databaseUrl);
   const cookie = createSessionCookie(config.production);

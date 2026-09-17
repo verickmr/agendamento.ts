@@ -34,6 +34,30 @@ afterEach(() => {
   queryClient.clear();
 });
 describe('booking form', () => {
+  it('disables past calendar dates and prevents a manually entered past booking', async () => {
+    const fetcher = vi.fn(async (input: string) =>
+      respond(input === '/api/meta' ? { today: '2026-09-15' } : availability),
+    );
+    vi.stubGlobal('fetch', fetcher);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Booking />
+      </QueryClientProvider>,
+    );
+    await screen.findByRole('radio', { name: '09:00' });
+    expect(screen.getByLabelText('Data da consulta')).toHaveAttribute('min', '2026-09-15');
+    expect(screen.getByRole('button', { name: '14 de setembro de 2026' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Mês anterior' })).toBeDisabled();
+    fireEvent.change(screen.getByLabelText('Data da consulta'), {
+      target: { value: '2026-09-14' },
+    });
+    expect(await screen.findByText('Escolha hoje ou uma data futura.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Confirmar agendamento' })).toBeDisabled();
+    expect(screen.queryAllByRole('radio')).toHaveLength(0);
+    expect(fetcher.mock.calls.some(([url]) => url === '/api/available?date=2026-09-14')).toBe(
+      false,
+    );
+  });
   it('prevents occupied slots and sends a validated booking only after a selection', async () => {
     const requests: { url: string; body: unknown }[] = [];
     vi.stubGlobal(
@@ -64,12 +88,25 @@ describe('booking form', () => {
     await user.click(screen.getByRole('radio', { name: '09:00' }));
     await user.click(screen.getByRole('button', { name: 'Confirmar agendamento' }));
     expect(await screen.findByText('Informe o nome completo.')).toBeInTheDocument();
+    expect(screen.getByText('Informe um e-mail válido.')).toBeInTheDocument();
+    expect(screen.getByLabelText('Telefone com DDD')).toHaveAttribute('aria-invalid', 'true');
     expect(requests).toHaveLength(0);
     await user.type(screen.getByLabelText('Seu nome completo'), '  Ana Maria  ');
+    await user.type(screen.getByLabelText('E-mail'), 'Ana@exemplo.com');
+    await user.type(screen.getByLabelText('Telefone com DDD'), '(11) 99999-9999');
     await user.click(screen.getByRole('button', { name: 'Confirmar agendamento' }));
     expect(await screen.findByRole('heading', { name: 'Consulta agendada.' })).toBeInTheDocument();
     expect(requests).toEqual([
-      { url: '/api/appointments', body: { name: 'Ana Maria', date: '2026-09-15', time: '09:00' } },
+      {
+        url: '/api/appointments',
+        body: {
+          name: 'Ana Maria',
+          email: 'ana@exemplo.com',
+          phone: '11999999999',
+          date: '2026-09-15',
+          time: '09:00',
+        },
+      },
     ]);
     expect(useBookingSelection.getState().time).toBe('');
   });

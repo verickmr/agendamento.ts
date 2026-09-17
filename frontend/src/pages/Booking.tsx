@@ -33,34 +33,44 @@ export default function Booking() {
   const initializedDate = useRef(Boolean(date));
   const [confirmed, setConfirmed] = useState<Appointment | null>(null);
   const meta = useQuery({
+    refetchInterval: 30_000,
     queryKey: ['meta'],
     queryFn: () => api<{ today: string; year: number }>('/meta'),
   });
   useEffect(() => {
     if (!initializedDate.current && meta.data) {
       initializedDate.current = true;
-      setDate(meta.data.today.startsWith('2026-') ? meta.data.today : '2026-01-01');
+      setDate(
+        meta.data.today < '2026-01-01'
+          ? '2026-01-01'
+          : meta.data.today > '2026-12-31'
+            ? '2026-12-31'
+            : meta.data.today,
+      );
     }
   }, [meta.data, setDate]);
-  const validDate = dateSchema.safeParse(date).success;
+  const minDate =
+    meta.data?.today && meta.data.today > '2026-01-01' ? meta.data.today : '2026-01-01';
+  const pastDate = Boolean(meta.data && date && date < minDate);
+  const validDate = dateSchema.safeParse(date).success && !pastDate;
   const available = useQuery({ ...availabilityOptions(date), enabled: validDate });
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<{ name: string }>({
+  } = useForm<{ name: string; email: string; phone: string }>({
     resolver: zodResolver(bookingSchema),
-    defaultValues: { name: '' },
+    defaultValues: { name: '', email: '', phone: '' },
   });
   useEffect(() => {
     if (time && available.data && !available.data.slots.some((s) => s.start === time)) clear();
   }, [available.data, time, clear]);
   const book = useMutation({
-    mutationFn: (name: string) =>
+    mutationFn: (contact: { name: string; email: string; phone: string }) =>
       api<Appointment>('/appointments', {
         method: 'POST',
-        body: JSON.stringify({ name, date, time }),
+        body: JSON.stringify({ ...contact, date, time }),
       }),
     onSuccess: async (result) => {
       setConfirmed(result);
@@ -145,14 +155,16 @@ export default function Booking() {
           </div>
           <div className="picker-columns">
             <div>
-              <DateField value={date} onChange={setDate} />
+              <DateField value={date} onChange={setDate} min={minDate} />
               {date && !validDate && (
                 <p role="alert" className="field-error">
-                  Escolha uma data válida de 2026.
+                  {pastDate
+                    ? 'Escolha hoje ou uma data futura.'
+                    : 'Escolha uma data válida de 2026.'}
                 </p>
               )}
-              {date && validDate && (
-                <Calendar key={date.slice(0, 7)} date={date} onSelect={setDate} />
+              {dateSchema.safeParse(date).success && (
+                <Calendar key={date.slice(0, 7)} date={date} onSelect={setDate} min={minDate} />
               )}
             </div>
             <section className="time-section" aria-labelledby="times-label">
@@ -164,7 +176,7 @@ export default function Booking() {
               {available.isError && (
                 <ErrorNotice error={available.error} retry={() => void available.refetch()} />
               )}
-              {available.data && !available.isError && (
+              {available.data && validDate && !available.isError && (
                 <>
                   <div className="time-grid" role="radiogroup" aria-label="Horário da consulta">
                     {allTimes.map((t) => (
@@ -251,8 +263,9 @@ export default function Booking() {
           </div>
           <Separator />
           <form
-            onSubmit={handleSubmit(({ name }) => {
-              if (validDate && availableTimes.has(time) && !available.isFetching) book.mutate(name);
+            onSubmit={handleSubmit((contact) => {
+              if (meta.data && validDate && availableTimes.has(time) && !available.isFetching)
+                book.mutate(contact);
             })}
           >
             <FieldGroup>
@@ -268,12 +281,43 @@ export default function Booking() {
                 />
                 <FieldError errors={[errors.name]} />
               </Field>
+              <Field data-invalid={!!errors.email}>
+                <FieldLabel htmlFor="patient-email">E-mail</FieldLabel>
+                <Input
+                  id="patient-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="voce@exemplo.com"
+                  maxLength={254}
+                  aria-invalid={!!errors.email}
+                  {...register('email')}
+                />
+                <FieldError errors={[errors.email]} />
+              </Field>
+              <Field data-invalid={!!errors.phone}>
+                <FieldLabel htmlFor="patient-phone">Telefone com DDD</FieldLabel>
+                <Input
+                  id="patient-phone"
+                  type="tel"
+                  autoComplete="tel"
+                  placeholder="(11) 99999-9999"
+                  maxLength={30}
+                  aria-invalid={!!errors.phone}
+                  {...register('phone')}
+                />
+                <FieldError errors={[errors.phone]} />
+              </Field>
               {book.isError && <ErrorNotice error={book.error} />}
               <Button
                 type="submit"
                 className="w-full"
                 disabled={
-                  !time || !validDate || available.isFetching || available.isError || book.isPending
+                  !meta.data ||
+                  !time ||
+                  !validDate ||
+                  available.isFetching ||
+                  available.isError ||
+                  book.isPending
                 }
               >
                 {book.isPending ? 'Confirmando…' : 'Confirmar agendamento'}
@@ -302,7 +346,7 @@ export default function Booking() {
         </span>
       </div>
       <p className="public-note">
-        Feriados, finais de semana e períodos bloqueados não estão disponíveis.
+        Datas e horários passados, feriados e finais de semana não estão disponíveis.
       </p>
     </main>
   );

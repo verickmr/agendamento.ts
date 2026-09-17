@@ -11,7 +11,17 @@ export const nameSchema = z
   .trim()
   .min(1, 'Informe o nome completo.')
   .max(120, 'Use até 120 caracteres.');
-export const bookingSchema = z.object({ name: nameSchema });
+export const bookingSchema = z.object({
+  name: nameSchema,
+  email: z.string().trim().toLowerCase().email('Informe um e-mail válido.').max(254),
+  phone: z
+    .string()
+    .trim()
+    .max(30)
+    .regex(/^[+\d\s().-]+$/, 'Informe um telefone válido com DDD.')
+    .transform((value) => value.replace(/\D/g, ''))
+    .refine((value) => /^(?:55)?\d{10,11}$/.test(value), 'Informe um telefone válido com DDD.'),
+});
 export const loginSchema = z.object({
   email: z.string().trim().email('Informe um e-mail válido.'),
   password: z.string().min(1, 'Informe sua senha.'),

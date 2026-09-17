@@ -212,6 +212,8 @@ export default function Reception() {
                   <span>
                     <strong>{a.name}</strong>
                     <small>Atendimento clínico</small>
+                    {a.email && <small className="patient-contact">{a.email}</small>}
+                    {a.phone && <small className="patient-contact">{a.phone}</small>}
                   </span>
                 </div>
                 <div>
@@ -259,16 +261,24 @@ export default function Reception() {
           </span>
         </div>
       </section>
-      {editing && <EditDialog appointment={editing} onClose={() => setEditing(null)} />}{' '}
+      {editing && (
+        <EditDialog
+          appointment={editing}
+          today={meta.data?.today}
+          onClose={() => setEditing(null)}
+        />
+      )}{' '}
       {cancelling && <CancelDialog appointment={cancelling} onClose={() => setCancelling(null)} />}
     </>
   );
 }
 function EditDialog({
   appointment: a,
+  today,
   onClose,
 }: {
   appointment: Appointment;
+  today?: string;
   onClose: () => void;
 }) {
   const form = useForm<z.infer<typeof editSchema>>({
@@ -318,7 +328,13 @@ function EditDialog({
             alteração não puder ser concluída.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={form.handleSubmit((values) => update.mutate(values))}>
+        <form
+          noValidate
+          onSubmit={form.handleSubmit((values) => {
+            if (!changedSchedule || (today && date >= today && options.includes(time)))
+              update.mutate(values);
+          })}
+        >
           <FieldGroup>
             <Field data-invalid={!!form.formState.errors.name}>
               <FieldLabel htmlFor="edit-name">Nome completo</FieldLabel>
@@ -335,7 +351,7 @@ function EditDialog({
               <Input
                 type="date"
                 id="edit-date"
-                min="2026-01-01"
+                min={today || '2026-01-01'}
                 max="2026-12-31"
                 aria-invalid={!!form.formState.errors.date}
                 {...form.register('date', { onChange: () => form.setValue('time', '') })}
@@ -383,7 +399,11 @@ function EditDialog({
                 disabled={
                   update.isPending ||
                   (changedSchedule &&
-                    (availability.isFetching || availability.isError || !options.includes(time)))
+                    (!today ||
+                      date < today ||
+                      availability.isFetching ||
+                      availability.isError ||
+                      !options.includes(time)))
                 }
               >
                 {update.isPending ? 'Salvando…' : 'Salvar alterações'}

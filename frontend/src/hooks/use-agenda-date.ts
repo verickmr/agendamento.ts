@@ -5,7 +5,11 @@ import { api } from '@/lib/api';
 export function useAgendaDate() {
   const [date, setDate] = useState('');
   const initializedDate = useRef(false);
-  const meta = useQuery({ queryKey: ['meta'], queryFn: () => api<{ today: string }>('/meta') });
+  const meta = useQuery({
+    queryKey: ['meta'],
+    queryFn: () => api<{ today: string }>('/meta'),
+    refetchInterval: 30_000,
+  });
   useEffect(() => {
     if (!initializedDate.current && meta.data) {
       initializedDate.current = true;

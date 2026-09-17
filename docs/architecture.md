@@ -53,7 +53,9 @@ Criar um bloqueio e reservar um horário participam do mesmo protocolo de locks.
 
 Data de consulta é um dia de calendário, não um instante UTC. O domínio trabalha com AAAA-MM-DD e horário como minuto do dia; a conversão para DATE ocorre no repositório. Instantes de criação são UTC. A interface informa America/Sao_Paulo.
 
-A agenda é limitada a 2026 e aceita datas passadas nesse ano para reproduzir o exemplo do enunciado. Todas as datas retornadas pelo endpoint BR são bloqueadas, incluindo tipos opcionais e regionais. O sistema não adiciona uma base municipal própria. Sem API válida, não há reserva ou remarcação. Cancelamento e mudanças administrativas que não dependem da verificação de feriados continuam possíveis.
+A agenda é limitada a 2026. Reservas e remarcações exigem horário futuro em `America/Sao_Paulo`, com verificação antes da consulta de feriados e novamente antes da escrita dentro da transação. O relógio é injetável para testes determinísticos. Correções de nome e cancelamentos de registros antigos continuam possíveis. Todas as datas retornadas pelo endpoint BR são bloqueadas, incluindo tipos opcionais e regionais. Sem API válida, não há reserva ou remarcação.
+
+E-mail e telefone são obrigatórios em novas reservas e persistidos no PostgreSQL. A migração permite valores nulos nos registros antigos, sem inventar contatos. A disponibilidade pública não retorna esses dados.
 
 ## Autenticação
 

@@ -18,6 +18,7 @@ import {
   type CreateBlock,
 } from '../domain/schedule.js';
 import { appointmentDTO, blockDTO } from './dto.js';
+import { clinicTime, isFutureSlot } from '../domain/clinic-time.js';
 
 const conflict = () =>
   new AppError(409, 'SLOT_UNAVAILABLE', 'Este horário não está mais disponível. Escolha outro.');
@@ -25,7 +26,12 @@ export class ScheduleService {
   constructor(
     private readonly repository: ScheduleRepository,
     private readonly holidays: HolidayProvider,
+    private readonly now: () => Date = () => new Date(),
   ) {}
+  private assertFutureSlot(date: string, minute: number) {
+    if (!isFutureSlot(date, minute, this.now()))
+      throw new AppError(422, 'PAST_SLOT', 'Escolha uma data e um horário futuros.');
+  }
   private async loadHolidays() {
     try {
       return await this.holidays.list();
@@ -73,6 +79,8 @@ export class ScheduleService {
     const holidays = await this.loadHolidays();
     const day = businessDay(date, holidays);
     const snapshot = await this.repository.availabilitySnapshot(date);
+    const now = this.now();
+    const current = clinicTime(now);
     const wholeDay = snapshot.blocked.includes(null);
     const occupiedMinutes = new Set(snapshot.occupied);
     const blockedMinutes = new Set(
@@ -80,11 +88,20 @@ export class ScheduleService {
     );
     const slots = day.isBusinessDay
       ? allSlots
-          .filter((minute) => !occupiedMinutes.has(minute) && !blockedMinutes.has(minute))
+          .filter(
+            (minute) =>
+              isFutureSlot(date, minute, now) &&
+              !occupiedMinutes.has(minute) &&
+              !blockedMinutes.has(minute),
+          )
           .map((minute) => ({ start: minuteToTime(minute), end: minuteToTime(minute + 60) }))
       : [];
     const reason =
+      (date < current.date ? 'Não é possível agendar em datas passadas.' : null) ??
       day.reason ??
+      (date === current.date && !allSlots.some((minute) => isFutureSlot(date, minute, now))
+        ? 'Os horários de hoje já encerraram. Escolha uma próxima data.'
+        : null) ??
       (wholeDay
         ? 'Agenda bloqueada para este dia.'
         : slots.length === 0
@@ -106,12 +123,16 @@ export class ScheduleService {
     return { appointments: appointments.map(appointmentDTO) };
   }
   async create(input: CreateAppointment) {
+    this.assertFutureSlot(input.date, timeToMinute(input.time));
     await this.assertBusinessDay(input.date);
     return this.repository.withDateLocks([input.date], async (transaction) => {
       const startMinute = timeToMinute(input.time);
       await this.ensureSlotAvailable(transaction, input.date, startMinute);
+      this.assertFutureSlot(input.date, startMinute);
       const appointment = await transaction.insertAppointment({
         name: input.name,
+        email: input.email,
+        phone: input.phone,
         date: toDate(input.date),
         startMinute,
       });
@@ -123,13 +144,20 @@ export class ScheduleService {
     this.ensureEditableAppointment(initial, input.version);
     const oldDate = dateString(initial.date);
     const targetDate = input.date ?? oldDate;
-    if (input.date !== undefined || input.time !== undefined)
+    const changesSchedule = input.date !== undefined || input.time !== undefined;
+    if (changesSchedule) {
+      this.assertFutureSlot(
+        targetDate,
+        input.time === undefined ? initial.startMinute : timeToMinute(input.time),
+      );
       await this.assertBusinessDay(targetDate);
+    }
     return this.repository.withDateLocks([oldDate, targetDate], async (transaction) => {
       const current = await transaction.findAppointment(id);
       this.ensureEditableAppointment(current, input.version);
       const startMinute = input.time === undefined ? current.startMinute : timeToMinute(input.time);
       await this.ensureSlotAvailable(transaction, targetDate, startMinute, id);
+      if (changesSchedule) this.assertFutureSlot(targetDate, startMinute);
       const appointment = await transaction.updateAppointment(id, input.version, {
         name: input.name,
         date: toDate(targetDate),

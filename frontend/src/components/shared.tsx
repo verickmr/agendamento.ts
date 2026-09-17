@@ -36,11 +36,13 @@ export function DateField({
   value,
   onChange,
   label = 'Data da consulta',
+  min = '2026-01-01',
 }: {
   id?: string;
   value: string;
   onChange: (value: string) => void;
   label?: string;
+  min?: string;
 }) {
   return (
     <Field>
@@ -48,7 +50,7 @@ export function DateField({
       <Input
         type="date"
         id={id}
-        min="2026-01-01"
+        min={min}
         max="2026-12-31"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -57,7 +59,15 @@ export function DateField({
     </Field>
   );
 }
-export function Calendar({ date, onSelect }: { date: string; onSelect: (date: string) => void }) {
+export function Calendar({
+  date,
+  onSelect,
+  min = '2026-01-01',
+}: {
+  date: string;
+  onSelect: (date: string) => void;
+  min?: string;
+}) {
   const initial = date ? Number(date.slice(5, 7)) - 1 : 0;
   const [month, setMonth] = useState(initial);
   const start = new Date(Date.UTC(2026, month, 1)).getUTCDay();
@@ -70,7 +80,7 @@ export function Calendar({ date, onSelect }: { date: string; onSelect: (date: st
           variant="ghost"
           size="icon"
           aria-label="Mês anterior"
-          disabled={month === 0}
+          disabled={month === 0 || monthDate <= min.slice(0, 7) + '-01'}
           onClick={() => setMonth(month - 1)}
         >
           <ChevronLeft />
@@ -106,7 +116,7 @@ export function Calendar({ date, onSelect }: { date: string; onSelect: (date: st
               className="calendar-day"
               aria-label={formatDate(value, { day: 'numeric', month: 'long', year: 'numeric' })}
               aria-pressed={date === value}
-              disabled={weekend}
+              disabled={weekend || value < min}
               onClick={() => onSelect(value)}
             >
               {day}

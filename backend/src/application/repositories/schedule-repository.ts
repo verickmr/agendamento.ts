@@ -1,6 +1,9 @@
 import type { AppointmentRecord, AppointmentStatus, BlockRecord } from '../../domain/entities.js';
 
-export type NewAppointment = Pick<AppointmentRecord, 'name' | 'date' | 'startMinute'>;
+export type NewAppointment = Pick<
+  AppointmentRecord,
+  'name' | 'email' | 'phone' | 'date' | 'startMinute'
+>;
 export type AppointmentChanges = Partial<
   Pick<
     AppointmentRecord,

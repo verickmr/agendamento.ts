@@ -28,7 +28,9 @@ const holidays: HolidayProvider = {
     return [{ date: '2026-01-01', localName: 'Ano Novo' }];
   },
 };
+let currentInstant = '2025-12-31T12:00:00Z';
 const { app, close } = createApp({
+  now: () => new Date(currentInstant),
   prisma,
   holidays,
   config: {
@@ -40,7 +42,13 @@ const { app, close } = createApp({
   },
 });
 const origin = 'http://localhost:5173';
-const booking = { name: ' Maria ', date: '2026-09-15', time: '08:00' };
+const booking = {
+  name: ' Maria ',
+  email: 'maria@example.com',
+  phone: '11999999999',
+  date: '2026-09-15',
+  time: '08:00',
+};
 async function login() {
   const agent = request.agent(app);
   const response = await agent
@@ -62,6 +70,7 @@ beforeAll(async () => {
   });
 });
 beforeEach(async () => {
+  currentInstant = '2025-12-31T12:00:00Z';
   failProvider = false;
   providerCalls = 0;
   await prisma.availabilityBlock.deleteMany();
@@ -102,6 +111,8 @@ describe('PostgreSQL-backed scheduling and reception', () => {
     expect(created.status).toBe(201);
     expect(created.body).toMatchObject({
       name: 'Maria',
+      email: booking.email,
+      phone: booking.phone,
       date: booking.date,
       time: '08:00',
       endTime: '09:00',
@@ -114,7 +125,38 @@ describe('PostgreSQL-backed scheduling and reception', () => {
     expect(available.body.slots).toHaveLength(9);
     expect(available.body.occupied).toEqual(['08:00']);
     expect(JSON.stringify(available.body)).not.toContain('Maria');
+    expect(JSON.stringify(available.body)).not.toContain(booking.email);
+    expect(JSON.stringify(available.body)).not.toContain(booking.phone);
+    expect(await prisma.appointment.findUnique({ where: { id: created.body.id } })).toMatchObject({
+      email: booking.email,
+      phone: booking.phone,
+    });
     expect(providerCalls).toBe(2);
+  });
+  it('rejects past reservations and reschedules without changing the original record', async () => {
+    const created = await request(app).post('/appointments').send(booking);
+    const agent = await login();
+    currentInstant = '2026-09-15T12:30:00Z';
+    const past = await request(app)
+      .post('/appointments')
+      .send({ ...booking, time: '09:00' });
+    expect(past.status).toBe(422);
+    expect(past.body.error.code).toBe('PAST_SLOT');
+    const reschedule = await agent
+      .patch(`/appointments/${created.body.id}`)
+      .set('Origin', origin)
+      .send({ date: '2026-09-14', time: '10:00', version: 1 });
+    expect(reschedule.status).toBe(422);
+    expect(reschedule.body.error.code).toBe('PAST_SLOT');
+    expect(await prisma.appointment.count()).toBe(1);
+    expect(await prisma.appointment.findUnique({ where: { id: created.body.id } })).toMatchObject({
+      version: 1,
+      startMinute: 480,
+    });
+    const today = await request(app).get('/available').query({ date: booking.date });
+    expect(today.body.slots[0].start).toBe('10:00');
+    const previous = await request(app).get('/available').query({ date: '2026-09-14' });
+    expect(previous.body.slots).toEqual([]);
   });
   it('admits exactly one of simultaneous requests for the same slot', async () => {
     const results = await Promise.all(

@@ -15,6 +15,8 @@ const user = {
 const appointment = {
   id: '01c1dc67-324f-4149-92c6-cfbe418869b3',
   name: 'Maria',
+  email: 'maria@example.com',
+  phone: '11999999999',
   date: '2026-09-16',
   time: '08:00',
   endTime: '09:00',
@@ -99,7 +101,13 @@ describe('HTTP controllers with injected services', () => {
 
   it('creates a public appointment with normalized input and no session', async () => {
     const { app, services } = setup();
-    const input = { name: ' Maria ', date: appointment.date, time: appointment.time };
+    const input = {
+      name: ' Maria ',
+      email: appointment.email,
+      phone: appointment.phone,
+      date: appointment.date,
+      time: appointment.time,
+    };
     const response = await request(app).post('/appointments').send(input);
     expect(response.status).toBe(201);
     expect(response.body).toEqual(appointment);
@@ -198,9 +206,13 @@ describe('HTTP controllers with injected services', () => {
     services.appointments.create.mockRejectedValue(new Error('private database connection string'));
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     try {
-      const response = await request(app)
-        .post('/appointments')
-        .send({ name: 'Maria', date: appointment.date, time: appointment.time });
+      const response = await request(app).post('/appointments').send({
+        name: 'Maria',
+        email: appointment.email,
+        phone: appointment.phone,
+        date: appointment.date,
+        time: appointment.time,
+      });
       expect(response.status).toBe(500);
       expect(response.body.error.code).toBe('INTERNAL_ERROR');
       expect(JSON.stringify(response.body)).not.toContain('private database');

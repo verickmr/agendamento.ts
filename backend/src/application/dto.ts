@@ -5,6 +5,8 @@ export function appointmentDTO(item: AppointmentRecord) {
   return {
     id: item.id,
     name: item.name,
+    email: item.email,
+    phone: item.phone,
     date: dateString(item.date),
     time: minuteToTime(item.startMinute),
     endTime: minuteToTime(item.startMinute + 60),

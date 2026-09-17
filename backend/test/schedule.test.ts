@@ -16,7 +16,7 @@ describe('clinic scheduling rules', () => {
       expect(dateSchema.safeParse(value).success).toBe(false);
     },
   );
-  it('accepts past real dates in 2026', () =>
+  it('parses calendar dates independently of booking eligibility', () =>
     expect(dateSchema.parse('2026-01-02')).toBe('2026-01-02'));
   it.each(['07:00', '18:00', '08:30', '8:00', '10:01'])('rejects non slot %s', (value) => {
     expect(timeSchema.safeParse(value).success).toBe(false);
@@ -38,13 +38,25 @@ describe('clinic scheduling rules', () => {
     expect(minuteToTime(allSlots[9] + 60)).toBe('18:00');
   });
   it('trims patient names and refuses empty or oversized names', () => {
-    expect(createSchema.parse({ name: ' Maria ', date: '2026-01-02', time: '08:00' }).name).toBe(
-      'Maria',
-    );
+    expect(
+      createSchema.parse({
+        name: ' Maria ',
+        email: 'maria@example.com',
+        phone: '11999999999',
+        date: '2026-01-02',
+        time: '08:00',
+      }).name,
+    ).toBe('Maria');
     for (const name of ['  ', 'a'.repeat(121)])
-      expect(createSchema.safeParse({ name, date: '2026-01-02', time: '08:00' }).success).toBe(
-        false,
-      );
+      expect(
+        createSchema.safeParse({
+          name,
+          email: 'maria@example.com',
+          phone: '11999999999',
+          date: '2026-01-02',
+          time: '08:00',
+        }).success,
+      ).toBe(false);
   });
   it('requires a version and an actual field for edits', () => {
     expect(patchSchema.safeParse({ version: 1 }).success).toBe(false);
