@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ArrowRight,
@@ -15,6 +15,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PhoneInput } from '@/components/phone-input';
+import { formatPhone } from '@/lib/phone';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
@@ -58,11 +60,13 @@ export default function Booking() {
   const available = useQuery({ ...availabilityOptions(date), enabled: validDate });
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<{ name: string; email: string; phone: string }>({
     resolver: zodResolver(bookingSchema),
+    mode: 'onTouched',
     defaultValues: { name: '', email: '', phone: '' },
   });
   useEffect(() => {
@@ -134,7 +138,7 @@ export default function Booking() {
               <Phone aria-hidden="true" />
               <span className="patient-contact">
                 <strong>Telefone para contato</strong>
-                <span>{confirmed.phone}</span>
+                <span>{formatPhone(confirmed.phone)}</span>
               </span>
             </div>
           )}
@@ -284,6 +288,7 @@ export default function Booking() {
           </div>
           <Separator />
           <form
+            noValidate
             onSubmit={handleSubmit((contact) => {
               if (meta.data && validDate && availableTimes.has(time) && !available.isFetching)
                 book.mutate(contact);
@@ -298,9 +303,10 @@ export default function Booking() {
                   autoComplete="name"
                   maxLength={120}
                   aria-invalid={!!errors.name}
+                  aria-describedby={errors.name ? 'patient-name-error' : undefined}
                   {...register('name')}
                 />
-                <FieldError errors={[errors.name]} />
+                <FieldError id="patient-name-error" errors={[errors.name]} />
               </Field>
               <Field data-invalid={!!errors.email}>
                 <FieldLabel htmlFor="patient-email">E-mail</FieldLabel>
@@ -308,25 +314,33 @@ export default function Booking() {
                   id="patient-email"
                   type="email"
                   autoComplete="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   placeholder="voce@exemplo.com"
                   maxLength={254}
                   aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? 'patient-email-error' : undefined}
                   {...register('email')}
                 />
-                <FieldError errors={[errors.email]} />
+                <FieldError id="patient-email-error" errors={[errors.email]} />
               </Field>
               <Field data-invalid={!!errors.phone}>
                 <FieldLabel htmlFor="patient-phone">Telefone com DDD</FieldLabel>
-                <Input
-                  id="patient-phone"
-                  type="tel"
-                  autoComplete="tel"
-                  placeholder="(11) 99999-9999"
-                  maxLength={30}
-                  aria-invalid={!!errors.phone}
-                  {...register('phone')}
+                <Controller
+                  name="phone"
+                  control={control}
+                  render={({ field }) => (
+                    <PhoneInput
+                      {...field}
+                      id="patient-phone"
+                      autoComplete="tel"
+                      placeholder="(11) 99999-9999"
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={errors.phone ? 'patient-phone-error' : undefined}
+                    />
+                  )}
                 />
-                <FieldError errors={[errors.phone]} />
+                <FieldError id="patient-phone-error" errors={[errors.phone]} />
               </Field>
               {book.isError && <ErrorNotice error={book.error} />}
               <Button

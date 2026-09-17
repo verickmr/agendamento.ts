@@ -1,12 +1,16 @@
 import type { RequestHandler } from 'express';
 import { z } from 'zod';
+import { emailSchema } from '../../domain/contact.js';
 import type { AuthenticationService } from '../services.js';
 import { endSession, startSession, type SessionCookie } from '../session.js';
 
 const loginSchema = z
   .object({
-    email: z.string().trim().toLowerCase().email().max(254),
-    password: z.string().min(1).max(256),
+    email: emailSchema,
+    password: z
+      .string({ required_error: 'Informe sua senha.' })
+      .min(1, 'Informe sua senha.')
+      .max(256, 'A senha deve ter até 256 caracteres.'),
   })
   .strict();
 

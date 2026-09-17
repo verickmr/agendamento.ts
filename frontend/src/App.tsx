@@ -68,6 +68,7 @@ function Login() {
   const navigate = useNavigate();
   const form = useForm<{ email: string; password: string }>({
     resolver: zodResolver(loginSchema),
+    mode: 'onTouched',
     defaultValues: { email: '', password: '' },
   });
   const login = useMutation({
@@ -105,7 +106,7 @@ function Login() {
         </span>
         <h2>Bem-vindo de volta</h2>
         <p>Entre com sua conta da recepção.</p>
-        <form onSubmit={form.handleSubmit((data) => login.mutate(data))}>
+        <form noValidate onSubmit={form.handleSubmit((data) => login.mutate(data))}>
           <FieldGroup>
             <Field data-invalid={!!form.formState.errors.email}>
               <FieldLabel htmlFor="email">E-mail</FieldLabel>

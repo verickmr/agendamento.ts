@@ -34,6 +34,34 @@ afterEach(() => {
   queryClient.clear();
 });
 describe('booking form', () => {
+  it('validates contacts on blur and clears errors after correcting the masked phone', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string) =>
+        respond(input === '/api/meta' ? { today: '2026-09-15' } : availability),
+      ),
+    );
+    const user = userEvent.setup();
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Booking />
+      </QueryClientProvider>,
+    );
+    const phone = screen.getByLabelText('Telefone com DDD');
+    await user.type(phone, '00987654321');
+    await user.tab();
+    expect(await screen.findByText('Informe um DDD brasileiro válido.')).toBeInTheDocument();
+    expect(phone).toHaveAttribute('aria-describedby', 'patient-phone-error');
+    await user.clear(phone);
+    await user.type(phone, '11987654321');
+    expect(phone).toHaveValue('(11) 98765-4321');
+    expect(screen.queryByText('Informe um DDD brasileiro válido.')).not.toBeInTheDocument();
+    await user.type(screen.getByLabelText('E-mail'), 'invalido');
+    await user.tab();
+    expect(
+      await screen.findByText('Informe um e-mail válido, como nome@exemplo.com.'),
+    ).toBeInTheDocument();
+  });
   it('disables past calendar dates and prevents a manually entered past booking', async () => {
     const fetcher = vi.fn(async (input: string) =>
       respond(input === '/api/meta' ? { today: '2026-09-15' } : availability),
@@ -101,7 +129,7 @@ describe('booking form', () => {
     expect(screen.getByText('E-mail para contato')).toBeInTheDocument();
     expect(screen.getByText('ana@exemplo.com')).toBeInTheDocument();
     expect(screen.getByText('Telefone para contato')).toBeInTheDocument();
-    expect(screen.getByText('11999999999')).toBeInTheDocument();
+    expect(screen.getByText('(11) 99999-9999')).toBeInTheDocument();
     expect(requests).toEqual([
       {
         url: '/api/appointments',

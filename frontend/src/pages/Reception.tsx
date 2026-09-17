@@ -53,6 +53,7 @@ import {
 } from '@/lib/api';
 import { dateSchema, editSchema } from '@/lib/schemas';
 import { useAgendaDate } from '@/hooks/use-agenda-date';
+import { formatPhone } from '@/lib/phone';
 export default function Reception() {
   const { date, setDate, meta } = useAgendaDate();
   const [status, setStatus] = useState('CONFIRMED');
@@ -219,7 +220,7 @@ export default function Reception() {
                     )}
                     {a.phone && (
                       <a className="patient-contact" href={`tel:${a.phone}`}>
-                        Telefone: {a.phone}
+                        Telefone: {formatPhone(a.phone)}
                       </a>
                     )}
                     {!a.email && !a.phone && (

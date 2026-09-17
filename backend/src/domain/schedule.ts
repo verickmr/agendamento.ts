@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { nameSchema, emailSchema, phoneSchema } from './contact.js';
 
 export const TIMEZONE = 'America/Sao_Paulo';
 export const YEAR = 2026;
@@ -13,20 +14,7 @@ export const dateSchema = z
 export const timeSchema = z
   .string()
   .regex(/^(0[89]|1[0-7]):00$/, 'Escolha um horário inteiro entre 08:00 e 17:00.');
-const nameSchema = z
-  .string()
-  .trim()
-  .min(1, 'Informe o nome.')
-  .max(120, 'O nome deve ter até 120 caracteres.');
 export const versionSchema = z.number().int().positive();
-const emailSchema = z.string().trim().toLowerCase().email('Informe um e-mail válido.').max(254);
-const phoneSchema = z
-  .string()
-  .trim()
-  .max(30)
-  .regex(/^[+\d\s().-]+$/, 'Informe um telefone válido com DDD.')
-  .transform((value) => value.replace(/\D/g, ''))
-  .refine((value) => /^(?:55)?\d{10,11}$/.test(value), 'Informe um telefone válido com DDD.');
 export const idSchema = z.string().uuid();
 export const createSchema = z
   .object({

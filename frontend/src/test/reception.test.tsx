@@ -58,7 +58,7 @@ it('offers email and telephone links for the clinic and identifies legacy record
     'href',
     'mailto:ana@exemplo.com',
   );
-  expect(screen.getByRole('link', { name: 'Telefone: 11999999999' })).toHaveAttribute(
+  expect(screen.getByRole('link', { name: 'Telefone: (11) 99999-9999' })).toHaveAttribute(
     'href',
     'tel:11999999999',
   );

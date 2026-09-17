@@ -14,7 +14,9 @@ A API recebe e retorna JSON. No navegador, o proxy acrescenta `/api` às rotas a
 
 `status` aceita `CONFIRMED`, `CANCELLED` ou `ALL`; o padrão é `CONFIRMED`. Sem filtro de data, a listagem é ordenada por data e horário. Apenas consultas confirmadas podem ser editadas. Alterações exigem a versão lida pelo cliente; uma versão desatualizada retorna 409.
 
-O agendamento contém `id`, `name`, `email`, `phone`, `date`, `time`, `endTime`, `timezone`, `status`, `version`, `createdAt`, `updatedAt` e `cancelledAt`. O nome é obrigatório, com até 120 caracteres. Novas reservas exigem e-mail válido (até 254 caracteres, normalizado em minúsculas) e telefone brasileiro com DDD (10 ou 11 dígitos, opcionalmente com prefixo 55). A pontuação do telefone é removida. Contatos podem ser nulos em registros anteriores à migração.
+O agendamento contém `id`, `name`, `email`, `phone`, `date`, `time`, `endTime`, `timezone`, `status`, `version`, `createdAt`, `updatedAt` e `cancelledAt`. O nome é obrigatório, com pelo menos duas letras e até 120 caracteres; aceita acentos, espaços, pontos, apóstrofos e hífens. Espaços repetidos são normalizados. Novas reservas exigem e-mail válido (até 254 caracteres, normalizado em minúsculas) e telefone brasileiro com DDD válido: oito dígitos para fixo iniciado em 2–5 ou nove para celular iniciado em 9, opcionalmente com prefixo 55. A pontuação do telefone é removida. Contatos podem ser nulos em registros anteriores à migração.
+
+O formulário aplica máscara ao telefone e apresenta erros em português ao sair do campo. A API repete a validação e não depende da máscara. Validar o formato não comprova que o número ou e-mail existe. A numeração segue as orientações da [Anatel](https://www.gov.br/anatel/pt-br/regulado/numeracao/perguntas-frequentes).
 
 Datas passadas retornam disponibilidade vazia. Em hoje, são excluídos horários que já começaram, usando o relógio do servidor no fuso `America/Sao_Paulo`. Tentativas de reservar ou remarcar para o passado retornam 422 com código `PAST_SLOT`. Edição apenas do nome e cancelamento de registros históricos continuam permitidos.
 

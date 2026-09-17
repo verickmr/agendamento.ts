@@ -72,6 +72,7 @@ O Turbo gera o Prisma Client antes das tarefas que precisam dele. Build, tipos e
 - Atendimento de segunda a sexta, das 08:00 às 18:00, com consultas de uma hora. O último início é às 17:00.
 - Agenda de 2026, no fuso `America/Sao_Paulo`. Reservas e remarcações exigem data e horário futuros; horários que já começaram hoje também são bloqueados pelo backend.
 - Novas reservas exigem nome, e-mail válido e telefone com DDD. Os contatos ficam disponíveis apenas na confirmação da reserva e na recepção autenticada.
+- Telefone com máscara para fixo/celular e suporte a colagem com `+55`. Zod valida nomes, e-mail, DDD e número no frontend e backend; o banco recebe o telefone sem pontuação.
 - Feriados consultados no backend pela [API Nager.Date](https://date.nager.at/api/v3/PublicHolidays/2026/BR), sem cache e com timeout de oito segundos. Todas as datas retornadas são bloqueadas, inclusive itens regionais/opcionais.
 - Falha na API impede novas reservas e remarcações. Edição de nome e cancelamento continuam disponíveis.
 - Horários ocupados ou bloqueados não podem receber reservas. Transações e restrições no PostgreSQL protegem requisições simultâneas.

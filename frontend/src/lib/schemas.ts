@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { nameSchema, emailSchema, phoneSchema } from './contact-schemas';
+export { nameSchema } from './contact-schemas';
 export const dateSchema = z
   .string()
   .regex(/^2026-\d{2}-\d{2}$/, 'Escolha uma data de 2026.')
@@ -6,25 +8,17 @@ export const dateSchema = z
     const d = new Date(v + 'T12:00:00Z');
     return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === v;
   }, 'Escolha uma data válida.');
-export const nameSchema = z
-  .string()
-  .trim()
-  .min(1, 'Informe o nome completo.')
-  .max(120, 'Use até 120 caracteres.');
 export const bookingSchema = z.object({
   name: nameSchema,
-  email: z.string().trim().toLowerCase().email('Informe um e-mail válido.').max(254),
-  phone: z
-    .string()
-    .trim()
-    .max(30)
-    .regex(/^[+\d\s().-]+$/, 'Informe um telefone válido com DDD.')
-    .transform((value) => value.replace(/\D/g, ''))
-    .refine((value) => /^(?:55)?\d{10,11}$/.test(value), 'Informe um telefone válido com DDD.'),
+  email: emailSchema,
+  phone: phoneSchema,
 });
 export const loginSchema = z.object({
-  email: z.string().trim().email('Informe um e-mail válido.'),
-  password: z.string().min(1, 'Informe sua senha.'),
+  email: emailSchema,
+  password: z
+    .string()
+    .min(1, 'Informe sua senha.')
+    .max(256, 'A senha deve ter até 256 caracteres.'),
 });
 export const editSchema = z.object({
   name: nameSchema,
