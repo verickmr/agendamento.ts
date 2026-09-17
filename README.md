@@ -2,6 +2,8 @@
 
 Aplicação full stack para consultar horários e agendar consultas. O paciente agenda sem cadastro; a recepção autenticada pode editar, remarcar, cancelar e bloquear horários.
 
+**Demonstração:** [agendamento-ts.vercel.app](https://agendamento-ts.vercel.app). As credenciais da recepção são fornecidas separadamente.
+
 ## Tecnologias
 
 Monorepo com npm workspaces e Turborepo. Frontend em React, TypeScript e Vite, com shadcn/ui, Radix, React Hook Form, Zod, TanStack Query e Zustand. Backend em Express, com Prisma e PostgreSQL. Ambiente local e testes de integração em Docker.

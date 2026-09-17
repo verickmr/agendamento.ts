@@ -20,13 +20,30 @@ Na repetição de 16/09/2026, o teste de cancelamento excedeu a espera padrão d
 
 A preparação para Vercel acrescentou sete testes, totalizando 53 aprovados. A entrada publicada foi exercitada localmente com Supertest em `/api/meta`, `/api/appointments` e uma rota inexistente; isso não substitui um teste no domínio público. A verificação de tipos também inclui `api/index.ts`.
 
-Foi criado um projeto separado no Neon, com branches de demonstração e integração. Uma conexão TLS com `pg` executou `SELECT 1` na branch de teste. O Prisma nativo do Windows falhou ao abrir TLS com o erro de credenciais do pacote de segurança `-2146893042`; as migrações e os 20 testes de integração permanecem pendentes. A validação TLS não foi desativada.
+Foi criado um projeto separado no Neon, com branches de demonstração e integração. O Prisma nativo do Windows falhou ao abrir TLS com o erro de credenciais do pacote de segurança `-2146893042`. A execução remota em Linux resolveu essa limitação sem desativar a validação TLS.
+
+## CI e PostgreSQL
+
+A [execução no GitHub Actions](https://github.com/verickmr/agendamento.ts/actions/runs/35169855518) passou nos jobs `verify` e `containers`. Foram validados o build e a inicialização HTTP do frontend em Docker, além dos 20 testes de integração com PostgreSQL descartável.
+
+Os mesmos 20 testes passaram na branch isolada do Neon durante a preparação da publicação. Depois disso, migrações e seed foram aplicados no banco de demonstração. Os testes destrutivos usam `TEST_DATABASE_URL` e não acessam o banco da demonstração.
+
+## HTTPS em produção
+
+Foram aprovadas 30 requisições contra [agendamento-ts.vercel.app](https://agendamento-ts.vercel.app), cobrindo:
+
+- Página inicial, acesso direto à recepção, favicon e respostas 404 para API e assets inexistentes.
+- Saúde do banco, data do servidor e fuso America/Sao_Paulo.
+- Consulta real à API Nager, bloqueio de feriados e finais de semana e rejeição de parâmetros inválidos.
+- Login e sessão persistente; cookie com `Secure`, `HttpOnly` e `SameSite=Lax`.
+- Criação, persistência, conflito de horário e remoção do horário ocupado da disponibilidade.
+- Rejeição de alteração com origem não autorizada; edição, remarcação e cancelamento pela recepção.
+- Criação e remoção de bloqueio, liberação do horário e invalidação da sessão após logout.
+
+O agendamento de verificação foi cancelado e o bloqueio foi removido; nenhum horário de teste permanece ocupado.
 
 ## Pendências
 
-- Os 20 testes de integração com PostgreSQL ainda não foram executados.
-- Build e inicialização dos containers ainda precisam de validação real com Docker.
 - A interface ainda precisa de inspeção visual no navegador.
-- Não houve publicação nem validação dos cookies seguros atrás do proxy de hospedagem.
 
-O ambiente usado no desenvolvimento bloqueou o acesso ao WSL e ao navegador. Há comandos reproduzíveis no README e uma pipeline de CI preparada; isso não equivale a resultados aprovados para essas etapas.
+O ambiente local bloqueou o acesso ao WSL e ao navegador. A CI validou os containers, mas os testes HTTP e de componentes não substituem uma revisão visual.

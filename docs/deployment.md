@@ -6,6 +6,8 @@ Importe a raiz do monorepo, onde ficam `package.json` e `vercel.json`, como um �
 
 O frontend mantém suas chamadas relativas a `/api`. As páginas React têm fallback para `index.html`; chamadas de API não recebem esse fallback. O servidor local e o Docker continuam usando `backend/src/server.ts`.
 
+As rotas da Vercel usam uma expressão sem parâmetros nomeados para encaminhar `/api`, evitando que a plataforma acrescente um parâmetro `path` às consultas validadas estritamente. Arquivos estáticos são resolvidos antes do fallback da SPA. O adaptador Nager valida a resposta e mapeia explicitamente os campos do contrato de domínio, preservando a tipagem também na compilação da função na Vercel.
+
 O cliente Prisma é reutilizado enquanto a instância da função permanecer ativa. Use uma conexão Neon com pooling e `connection_limit=3`; o pool das sessões também limita conexões e utiliza `attachDatabasePool` da Vercel. A confiança no proxy gerenciado é ativada apenas na entrada exclusiva da Vercel, quando `VERCEL=1`.
 
 ## Variáveis de ambiente
@@ -41,6 +43,6 @@ Essas variáveis devem vir de um gerenciador de segredos ou arquivo local ignora
 
 Confirme `/api/health`, `/api/meta`, disponibilidade em dia útil e bloqueio de fins de semana e feriados. Reserve um horário, confirme a persistência após nova requisição, tente duplicá-lo e valide login, remarcação e cancelamento. Verifique cookie `Secure`, `HttpOnly` e `SameSite=Lax` no endereço HTTPS real, incluindo logout. Abra `/reception` diretamente para conferir o fallback da SPA.
 
-Os resultados efetivamente executados estão em [validação](verification.md). A presença desta configuração não significa que o deploy já foi concluído.
+O projeto está publicado em [agendamento-ts.vercel.app](https://agendamento-ts.vercel.app). Migrações e seed foram executados em Linux, com uma branch isolada do Neon para os testes antes da inicialização do banco de demonstração. Segredos de migração e seed foram usados apenas durante essa inicialização; o build normal permanece `npm run build`. Os resultados estão em [validação](verification.md).
 
 Referências: [Vite e funções na Vercel](https://vercel.com/docs/frameworks/frontend/vite), [cabeçalhos do proxy](https://vercel.com/docs/headers/request-headers) e [pooling no Neon](https://neon.com/docs/connect/connection-pooling).
